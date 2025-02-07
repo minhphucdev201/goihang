@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách sản phẩm</title>
+    <style>
+      body {
+        width: 700px;
+        font-family: Arial, sans-serif;
+       margin:20px;
+        background-color: #f8f9fa;
+      }
+      h1 {
+        text-align: center;
+      }
+      .search-bar {
+      
+        display: flex;
+        justify-content: center;
+      }
+      .search-input {
+        padding: 10px;
+        width: 300px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        font-size: 1em;
+      }
+      .product {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+   
+      .product-name {
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 1.4em;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      input[type="number"] {
+        width: 60px;
+        margin: 0 8px;
+        text-align: center;
+      }
+      button {
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .result {
+        margin-left: 10px; /* Thêm khoảng cách giữa số lượng và đơn vị */
+      }
+      #copy-button {
+        margin-top: 20px;
+        width: 100%;
+        padding: 10px;
+      }
+      .success-message {
+        display: none;
+        margin-top: 10px;
+        color: green;
+        font-weight: bold;
+      }
+
+      @media (min-width: 600px) {
+        .product {
+          flex-direction: row;
+          justify-content: space-between;
+        }
+        .product-name {
+          flex-grow: 1;
+          margin-bottom: 0;
+        }
+        .controls {
+          margin-bottom: 0;
+        }
+        #copy-button {
+          width: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Danh sách sản phẩm</h1>
+
+    <div class="search-bar">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Tìm kiếm sản phẩm..."
+        oninput="filterProducts()"
+      />
+    </div>
+
+    <div id="product-list"></div>
+    <button id="copy-button" onclick="copyToClipboard()">
+      Sao chép danh sách
+    </button>
+    <div id="success-message" class="success-message">
+      Đã sao chép danh sách sản phẩm!
+    </div>
+
+    <script>
+      const products = [
+        "táo đỏ tân cương",
+        "khoai lang mật",
+        "mít sấy",
+        "khô gà",
+        "khô heo",
+        "kẹo táo đỏ",
+        "mật cf",
+        "xuyến chi",
+        "bạc hà",
+        "xoài ngọt",
+        "macca",
+        "xoài ớt",
+        "điều rang muối",
+        "điều sữa",
+        "bánh chà bông",
+        "bánh rong biển",
+        "gạo lứt sấy rong biển",
+        "mix hạt",
+        "viên nghệ vo tay",
+        "tinh bột nghệ",
+        "ngũ cốc",
+        "cacao",
+        "sắn dây",
+        "trà gừng",
+        "trà dưỡng nhan",
+        "trà gạo lứt",
+        "trà mãng cầu",
+        "lipton",
+        "trà sơn mật",
+        "hoa đu đủ",
+        "khổ qua rừng",
+        "250g xoài ớt",
+        "250g xoài ngọt",
+        "250g khô gà",
+        "250g mít sấy",
+        "500g khoai lang mật",
+        "óc chó đỏ",
+        "hạnh nhân sấy",
+        "hạnh nhân tươi",
+        "bí tươi",
+        "bí sấy",
+        "khoai tấy sấy mật ong",
+        "nghệ đen",
+        "hạnh nhân rang bơ",
+        "khô bò sợi",
+        "mật ruồi rừng",
+      ];
+
+      const productList = document.getElementById("product-list");
+
+      function renderProducts(filteredProducts) {
+        productList.innerHTML = ""; // Xóa nội dung hiện tại
+        filteredProducts.forEach((product) => {
+          const productDiv = document.createElement("div");
+          productDiv.className = "product";
+
+          productDiv.innerHTML = `
+                <span class="product-name">${product}</span>
+                <div class="controls">
+                    <button onclick="changeQuantity('${product}', -1)">-</button>
+                    <input type="number" min="0" value="0" id="quantity-${product}" onchange="updateQuantity('${product}')">
+                    <button onclick="changeQuantity('${product}', 1)">+</button>
+                </div>
+                <span id="display-${product}" class="result">0 kg</span>
+            `;
+
+          productList.appendChild(productDiv);
+        });
+      }
+
+      renderProducts(products); // Hiển thị tất cả sản phẩm ban đầu
+
+      function changeQuantity(product, delta) {
+        const quantityInput = document.getElementById(`quantity-${product}`);
+        let currentQuantity = parseInt(quantityInput.value) || 0;
+        currentQuantity += delta;
+        if (currentQuantity < 0) currentQuantity = 0;
+        quantityInput.value = currentQuantity;
+
+        updateQuantity(product);
+      }
+
+      function updateQuantity(product) {
+        const quantityInput = document.getElementById(`quantity-${product}`);
+        let currentQuantity = parseInt(quantityInput.value) || 0;
+
+        // Cập nhật số lượng với đơn vị kg cho các sản phẩm đã chỉ định
+        if (["mít sấy", "khô gà", "khô heo", "kẹo táo đỏ"].includes(product)) {
+          const displayQuantity = (currentQuantity * 0.5).toFixed(1); // mỗi sản phẩm tương ứng với 0,5kg
+          document.getElementById(
+            `display-${product}`
+          ).textContent = `${displayQuantity} kg`;
+        } else {
+          document.getElementById(
+            `display-${product}`
+          ).textContent = `${currentQuantity} kg`;
+        }
+      }
+
+      function filterProducts() {
+        const searchInput = document
+          .querySelector(".search-input")
+          .value.toLowerCase();
+        const filteredProducts = products.filter((product) =>
+          product.toLowerCase().includes(searchInput)
+        );
+        renderProducts(filteredProducts); // Hiển thị các sản phẩm đã lọc
+      }
+
+      function copyToClipboard() {
+        let textToCopy = "";
+        products.forEach((product) => {
+          const quantityInput = document.getElementById(`quantity-${product}`);
+          const currentQuantity = parseInt(quantityInput.value) || 0;
+          let displayQuantity = currentQuantity;
+          if (
+            [
+              "khô gà",
+              "khô heo",
+              "kẹo táo đỏ",
+
+              "xoài ngọt",
+              "macca",
+              "xoài ớt",
+              "điều rang muối",
+              "điều sữa",
+              "bánh chà bông",
+              "bánh rong biển",
+
+              "mix hạt",
+              "viên nghệ vo tay",
+              "tinh bột nghệ",
+              "ngũ cốc",
+              "cacao",
+              "sắn dây",
+              "trà gừng",
+
+              "trà mãng cầu",
+              "lipton",
+
+              "hoa đu đủ",
+              "khổ qua rừng",
+
+              "óc chó đỏ",
+              "hạnh nhân sấy",
+              "hạnh nhân tươi",
+              "bí tươi",
+              "bí sấy",
+              "khoai tấy sấy mật ong",
+              "nghệ đen",
+              "hạnh nhân rang bơ",
+              "khô bò sợi",
+            ].includes(product)
+          ) {
+            displayQuantity = (currentQuantity * 0.5).toFixed(1) + " kg";
+          }
+          textToCopy += `${product}: ${displayQuantity}\n`;
+        });
+
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(() => {
+            const copyButton = document.getElementById("copy-button");
+            const successMessage = document.getElementById("success-message");
+
+            // Thay đổi màu nền nút
+            copyButton.style.backgroundColor = "#28a745";
+            setTimeout(() => {
+              copyButton.style.backgroundColor = "#007bff";
+            }, 300);
+
+            // Hiển thị thông báo thành công
+            successMessage.style.display = "block";
+            setTimeout(() => {
+              successMessage.style.display = "none";
+            }, 2000);
+          })
+          .catch((err) => {
+            console.error("Không thể sao chép: ", err);
+          });
+      }
+    </script>
+  </body>
+</html>

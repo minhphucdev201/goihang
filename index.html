@@ -8,14 +8,13 @@
       body {
         width: 700px;
         font-family: Arial, sans-serif;
-       margin:20px;
+        margin: 20px;
         background-color: #f8f9fa;
       }
       h1 {
         text-align: center;
       }
       .search-bar {
-      
         display: flex;
         justify-content: center;
       }
@@ -37,7 +36,6 @@
         border-radius: 5px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       }
-   
       .product-name {
         margin-bottom: 5px;
         font-weight: bold;
@@ -66,7 +64,7 @@
         background-color: #0056b3;
       }
       .result {
-        margin-left: 10px; /* Thêm khoảng cách giữa số lượng và đơn vị */
+        margin-left: 10px;
       }
       #copy-button {
         margin-top: 20px;
@@ -79,7 +77,6 @@
         color: green;
         font-weight: bold;
       }
-
       @media (min-width: 600px) {
         .product {
           flex-direction: row;
@@ -101,6 +98,10 @@
   <body>
     <h1>Danh sách sản phẩm</h1>
 
+    <button id="copy-button" onclick="copyToClipboard()">
+      Sao chép danh sách
+    </button>
+
     <div class="search-bar">
       <input
         type="text"
@@ -111,9 +112,6 @@
     </div>
 
     <div id="product-list"></div>
-    <button id="copy-button" onclick="copyToClipboard()">
-      Sao chép danh sách
-    </button>
     <div id="success-message" class="success-message">
       Đã sao chép danh sách sản phẩm!
     </div>
@@ -124,15 +122,21 @@
         "khoai lang mật",
         "mít sấy",
         "khô gà",
-        "khô heo",
+        "250g xoài ớt",
+        "250g xoài ngọt",
+        "250g khô gà",
+        "250g mít sấy",
+        "500g khoai lang mật",
+        "xoài ngọt",
+        "xoài ớt",
+        "macca",
+       
+        "điều rang muối",
+        
         "kẹo táo đỏ",
         "mật cf",
         "xuyến chi",
         "bạc hà",
-        "xoài ngọt",
-        "macca",
-        "xoài ớt",
-        "điều rang muối",
         "điều sữa",
         "bánh chà bông",
         "bánh rong biển",
@@ -151,11 +155,7 @@
         "trà sơn mật",
         "hoa đu đủ",
         "khổ qua rừng",
-        "250g xoài ớt",
-        "250g xoài ngọt",
-        "250g khô gà",
-        "250g mít sấy",
-        "500g khoai lang mật",
+     
         "óc chó đỏ",
         "hạnh nhân sấy",
         "hạnh nhân tươi",
@@ -166,12 +166,13 @@
         "hạnh nhân rang bơ",
         "khô bò sợi",
         "mật ruồi rừng",
+        "khô heo",
       ];
 
       const productList = document.getElementById("product-list");
 
       function renderProducts(filteredProducts) {
-        productList.innerHTML = ""; // Xóa nội dung hiện tại
+        productList.innerHTML = "";
         filteredProducts.forEach((product) => {
           const productDiv = document.createElement("div");
           productDiv.className = "product";
@@ -190,7 +191,7 @@
         });
       }
 
-      renderProducts(products); // Hiển thị tất cả sản phẩm ban đầu
+      renderProducts(products);
 
       function changeQuantity(product, delta) {
         const quantityInput = document.getElementById(`quantity-${product}`);
@@ -206,9 +207,42 @@
         const quantityInput = document.getElementById(`quantity-${product}`);
         let currentQuantity = parseInt(quantityInput.value) || 0;
 
-        // Cập nhật số lượng với đơn vị kg cho các sản phẩm đã chỉ định
-        if (["mít sấy", "khô gà", "khô heo", "kẹo táo đỏ"].includes(product)) {
-          const displayQuantity = (currentQuantity * 0.5).toFixed(1); // mỗi sản phẩm tương ứng với 0,5kg
+        if (
+          [
+            "mít sấy",
+            "khô gà",
+            "khô heo",
+            "kẹo táo đỏ",
+            "xoài ngọt",
+            "macca",
+            "xoài ớt",
+            "điều rang muối",
+            "điều sữa",
+            "bánh chà bông",
+            "bánh rong biển",
+            "mix hạt",
+            "viên nghệ vo tay",
+            "tinh bột nghệ",
+            "ngũ cốc",
+            "cacao",
+            "sắn dây",
+            "trà gừng",
+            "trà mãng cầu",
+            "lipton",
+            "hoa đu đủ",
+            "khổ qua rừng",
+            "óc chó đỏ",
+            "hạnh nhân sấy",
+            "hạnh nhân tươi",
+            "bí tươi",
+            "bí sấy",
+            "khoai tấy sấy mật ong",
+            "nghệ đen",
+            "hạnh nhân rang bơ",
+            "khô bò sợi",
+          ].includes(product)
+        ) {
+          const displayQuantity = (currentQuantity * 0.5).toFixed(1);
           document.getElementById(
             `display-${product}`
           ).textContent = `${displayQuantity} kg`;
@@ -226,21 +260,25 @@
         const filteredProducts = products.filter((product) =>
           product.toLowerCase().includes(searchInput)
         );
-        renderProducts(filteredProducts); // Hiển thị các sản phẩm đã lọc
+        renderProducts(filteredProducts);
       }
 
       function copyToClipboard() {
         let textToCopy = "";
+        let hasItems = false;
+
         products.forEach((product) => {
           const quantityInput = document.getElementById(`quantity-${product}`);
           const currentQuantity = parseInt(quantityInput.value) || 0;
-          let displayQuantity = currentQuantity;
+          let displayQuantity;
+
+          // Kiểm tra sản phẩm có nằm trong danh sách không
           if (
             [
+              "mít sấy",
               "khô gà",
               "khô heo",
               "kẹo táo đỏ",
-
               "xoài ngọt",
               "macca",
               "xoài ớt",
@@ -248,7 +286,6 @@
               "điều sữa",
               "bánh chà bông",
               "bánh rong biển",
-
               "mix hạt",
               "viên nghệ vo tay",
               "tinh bột nghệ",
@@ -256,13 +293,10 @@
               "cacao",
               "sắn dây",
               "trà gừng",
-
               "trà mãng cầu",
               "lipton",
-
               "hoa đu đủ",
               "khổ qua rừng",
-
               "óc chó đỏ",
               "hạnh nhân sấy",
               "hạnh nhân tươi",
@@ -276,30 +310,52 @@
           ) {
             displayQuantity = (currentQuantity * 0.5).toFixed(1) + " kg";
           }
-          textToCopy += `${product}: ${displayQuantity}\n`;
+          // Thay đổi đơn vị cho một số sản phẩm
+          else if (["mật cf", "xuyến chi", "bạc hà"].includes(product)) {
+            displayQuantity = currentQuantity + " lít";
+          } else if (
+            [
+              "250g xoài ớt",
+              "250g xoài ngọt",
+              "250g khô gà",
+              "250g mít sấy",
+              "500g khoai lang mật",
+            ].includes(product)
+          ) {
+            displayQuantity = currentQuantity + " túi";
+          } else {
+            displayQuantity = currentQuantity + " kg"; // Hiển thị số lượng kg cho các sản phẩm khác
+          }
+
+          if (currentQuantity > 0) {
+            textToCopy += `${product}: ${displayQuantity} \n`;
+            hasItems = true;
+          }
         });
 
-        navigator.clipboard
-          .writeText(textToCopy)
-          .then(() => {
-            const copyButton = document.getElementById("copy-button");
-            const successMessage = document.getElementById("success-message");
+        if (hasItems) {
+          navigator.clipboard
+            .writeText(textToCopy)
+            .then(() => {
+              const copyButton = document.getElementById("copy-button");
+              const successMessage = document.getElementById("success-message");
 
-            // Thay đổi màu nền nút
-            copyButton.style.backgroundColor = "#28a745";
-            setTimeout(() => {
-              copyButton.style.backgroundColor = "#007bff";
-            }, 300);
+              copyButton.style.backgroundColor = "#28a745";
+              setTimeout(() => {
+                copyButton.style.backgroundColor = "#007bff";
+              }, 300);
 
-            // Hiển thị thông báo thành công
-            successMessage.style.display = "block";
-            setTimeout(() => {
-              successMessage.style.display = "none";
-            }, 2000);
-          })
-          .catch((err) => {
-            console.error("Không thể sao chép: ", err);
-          });
+              successMessage.style.display = "block";
+              setTimeout(() => {
+                successMessage.style.display = "none";
+              }, 2000);
+            })
+            .catch((err) => {
+              console.error("Không thể sao chép: ", err);
+            });
+        } else {
+          alert("Không có sản phẩm nào được chọn để sao chép.");
+        }
       }
     </script>
   </body>
